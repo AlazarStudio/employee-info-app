@@ -1,0 +1,45 @@
+{
+    "organization": {
+      "name": "TechnoSoft",
+      "description": "Компания-разработчик программного обеспечения",
+      "address": "ул. Программистов, 42",
+      "image": "/vite.svg"
+    },
+    "departments": [
+      {
+        "id": 1,
+        "name": "Отдел разработки"
+      },
+      {
+        "id": 2,
+        "name": "HR-отдел"
+      }
+    ],
+    "employees": [
+      {
+        "id": 1,
+        "name": "Иванов Пётр Олегович",
+        "position": "Frontend-разработчик",
+        "email": "ivanov@technosoft.com",
+        "phone": "89001234567",
+        "info": "Специалист по React",
+        "image": "",
+        "departmentId": 1,
+        "login": "ivanov.p.o",
+        "password": "123456"
+      },
+      {
+        "id": 2,
+        "name": "Смирнова Анна Витальевна",
+        "position": "HR-менеджер",
+        "email": "smirnova@technosoft.com",
+        "phone": "89112223344",
+        "info": "",
+        "image": "",
+        "departmentId": 2,
+        "login": "smirnova.a.v",
+        "password": "654321"
+      }
+    ]
+  }
+  

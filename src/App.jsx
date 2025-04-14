@@ -2,6 +2,7 @@ import { useState } from 'react'
 import InstallButton from "./InstallButton/InstallButton";
 
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import EmployeeProfile from './components/EmployeeProfile';
@@ -9,9 +10,13 @@ import AdminRoute from './routes/AdminRoute';
 import EmployeeRoute from './routes/EmployeeRoute';
 import StartRedirect from './routes/StartRedirect';
 import EmployeeDashboard from './components/EmployeeDashboard';
+import { initFromJson } from './utils/initFromJson';
 
 function App() {
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  useEffect(() => {
+    initFromJson();
+  }, []);
 
   return (
     <>

@@ -9,9 +9,10 @@ import {
   MenuItem,
   Box,
   Typography,
+  IconButton,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-
+import { Delete as DeleteIcon } from '@mui/icons-material';
 
 const transliterate = (text) => {
   const map = {
@@ -43,7 +44,6 @@ const generateLogin = (fullName) => {
   return `${surname}.${initialName}.${initialPatronymic}${suffix}`;
 };
 
-
 const generatePassword = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -59,6 +59,7 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
   const [image, setImage] = useState(null);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [extraFields, setExtraFields] = useState([]);
 
   useEffect(() => {
     setDepartmentId(defaultDepartmentId || '');
@@ -66,8 +67,7 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
 
   useEffect(() => {
     if (name.trim().length > 3) {
-      const loginGenerated = generateLogin(name);
-      setLogin(loginGenerated);
+      setLogin(generateLogin(name));
       setPassword(generatePassword());
     }
   }, [name]);
@@ -76,9 +76,7 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result); // base64
-      };
+      reader.onloadend = () => setImage(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -97,14 +95,16 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
       phone,
       info,
       departmentId,
-      image, // base64
+      image,
       login,
       password,
+      extra: extraFields.filter(field => field.label.trim() && field.value.trim()),
     };
 
     onAdd(newEmployee);
     onClose();
 
+    // Reset fields
     setName('');
     setPosition('');
     setEmail('');
@@ -114,6 +114,23 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
     setImage(null);
     setLogin('');
     setPassword('');
+    setExtraFields([]);
+  };
+
+  const addExtraField = () => {
+    setExtraFields([...extraFields, { label: '', value: '' }]);
+  };
+
+  const updateExtraField = (index, field, value) => {
+    const updated = [...extraFields];
+    updated[index][field] = value;
+    setExtraFields(updated);
+  };
+
+  const removeExtraField = (index) => {
+    const updated = [...extraFields];
+    updated.splice(index, 1);
+    setExtraFields(updated);
   };
 
   return (
@@ -121,30 +138,10 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
       <DialogTitle>Добавить сотрудника</DialogTitle>
       <DialogContent>
         <Stack spacing={2} mt={1}>
-          <TextField
-            label="ФИО"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Должность"
-            value={position}
-            onChange={(e) => setPosition(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Телефон"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            fullWidth
-          />
+          <TextField label="ФИО" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
+          <TextField label="Должность" value={position} onChange={(e) => setPosition(e.target.value)} fullWidth />
+          <TextField label="Email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
+          <TextField label="Телефон" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
           <TextField
             label="Отдел"
             value={departmentId}
@@ -153,27 +150,20 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
             fullWidth
           >
             {departments.map((d) => (
-              <MenuItem key={d.id} value={d.id}>
-                {d.name}
-              </MenuItem>
+              <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
             ))}
           </TextField>
           <TextField
             label="Доп. информация"
             value={info}
             onChange={(e) => setInfo(e.target.value)}
-            multiline
-            rows={2}
+            multiline rows={2}
             fullWidth
           />
+
           <Button component="label" variant="outlined">
             Загрузить фото
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleImageUpload}
-            />
+            <input type="file" hidden accept="image/*" onChange={handleImageUpload} />
           </Button>
 
           {image && (
@@ -200,15 +190,42 @@ const EmployeeForm = ({ open, onClose, onAdd, departments, defaultDepartmentId =
               <Typography variant="body2">Пароль: <b>{password}</b></Typography>
             </Box>
           )}
+
+          <Typography variant="subtitle2" sx={{ mt: 3 }}>
+            Дополнительные поля
+          </Typography>
+          {extraFields.map((field, index) => (
+            <Box key={index} sx={{ position: 'relative', border: '1px solid #ccc', borderRadius: 2, p: 2 }}>
+              <TextField
+                label="Название поля"
+                value={field.label}
+                onChange={(e) => updateExtraField(index, 'label', e.target.value)}
+                fullWidth
+                sx={{ mb: 1 }}
+              />
+              <TextField
+                label="Значение"
+                value={field.value}
+                onChange={(e) => updateExtraField(index, 'value', e.target.value)}
+                fullWidth
+              />
+              <IconButton
+                onClick={() => removeExtraField(index)}
+                color="error"
+                sx={{ position: 'absolute', top: 8, right: 8 }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
+          <Button variant="outlined" onClick={addExtraField}>
+            + Добавить поле
+          </Button>
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="secondary">
-          Отмена
-        </Button>
-        <Button onClick={handleSubmit} variant="contained">
-          Сохранить
-        </Button>
+        <Button onClick={onClose} color="secondary">Отмена</Button>
+        <Button onClick={handleSubmit} variant="contained">Сохранить</Button>
       </DialogActions>
     </Dialog>
   );
